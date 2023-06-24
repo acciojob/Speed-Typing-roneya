@@ -1,57 +1,78 @@
-const quoteDisplay = document.getElementById("quote");
-const quoteInput = document.getElementById("quoteInput");
-const timerValue = document.querySelector(".timer span");
-let startTime, endTime, timerInterval;
-
 // Fetch a random quote from the API
-function fetchRandomQuote() {
-  fetch("http://api.quotable.io/random")
+function fetchQuote() {
+  fetch('http://api.quotable.io/random')
     .then(response => response.json())
     .then(data => {
-      quoteDisplay.textContent = data.content;
-      quoteInput.value = "";
-      quoteInput.focus();
+      document.getElementById('quote').innerText = data.content;
     });
 }
 
-// Check typing accuracy and update text color
-function checkTypingAccuracy() {
-  const quoteText = quoteDisplay.textContent;
-  const typedText = quoteInput.value;
-  let isCorrect = true;
+// Check if the typed text matches the quote
+function checkTyping() {
+  const quote = document.getElementById('quote').innerText;
+  const input = document.getElementById('quoteInput').value;
+  const quoteWords = quote.split(' ');
+  const inputWords = input.split(' ');
 
-  for (let i = 0; i < typedText.length; i++) {
-    if (typedText[i] === quoteText[i]) {
-      quoteInput.classList.remove("incorrect");
+  document.getElementById('quote').innerHTML = '';
+
+  quoteWords.forEach((word, index) => {
+    const wordSpan = document.createElement('span');
+
+    if (inputWords[index] === word) {
+      wordSpan.classList.add('correct');
     } else {
-      quoteInput.classList.add("incorrect");
-      isCorrect = false;
+      wordSpan.classList.add('incorrect');
     }
-  }
 
-  if (typedText === quoteText && isCorrect) {
-    clearInterval(timerInterval);
-    setTimeout(() => {
-      fetchRandomQuote();
-      timerValue.textContent = "0";
-    }, 3000);
-  }
+    wordSpan.innerText = word + ' ';
+    document.getElementById('quote').appendChild(wordSpan);
+  });
 }
 
-// Update the timer value
+// Clear the input field
+function clearInput() {
+  document.getElementById('quoteInput').value = '';
+}
+
+// Reset the timer to zero
+function resetTimer() {
+  clearInterval(timer);
+  seconds = 0;
+  updateTimer();
+}
+
+// Update the timer display
 function updateTimer() {
-  const currentTime = Math.floor((Date.now() - startTime) / 1000);
-  timerValue.textContent = currentTime;
+  document.querySelector('.timer').innerText = `Time: ${seconds}s`;
 }
 
 // Start the timer
 function startTimer() {
-  startTime = Date.now();
-  timerInterval = setInterval(updateTimer, 1000);
+  timer = setInterval(() => {
+    seconds++;
+    updateTimer();
+  }, 1000);
 }
 
-quoteInput.addEventListener("input", checkTypingAccuracy);
+// Fetch a new quote, clear input, and start the timer
+function fetchNewQuote() {
+  fetchQuote();
+  clearInput();
+  resetTimer();
+  setTimeout(startTimer, 3000);
+}
 
-fetchRandomQuote();
+// Initialize the timer
+let seconds = 0;
+let timer;
 
-quoteInput.addEventListener("keydown", startTimer);
+// Fetch initial quote and add event listener
+window.addEventListener('DOMContentLoaded', () => {
+  fetchQuote();
+  document.getElementById('quoteInput').addEventListener('input', checkTyping);
+  document.getElementById('quoteInput').addEventListener('input', clearInput);
+  document.getElementById('quoteInput').addEventListener('input', resetTimer);
+  document.getElementById('quoteInput').addEventListener('input', fetchNewQuote);
+  startTimer();
+});

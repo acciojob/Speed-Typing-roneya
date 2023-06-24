@@ -1,0 +1,15 @@
+.quote-display {
+  margin-bottom: 10px;
+}
+
+.correct {
+  color: green;
+}
+
+.incorrect {
+  color: red;
+}
+
+.timer {
+  font-weight: bold;
+}
