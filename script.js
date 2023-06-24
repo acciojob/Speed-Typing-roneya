@@ -1,5 +1,3 @@
-//your JS code here. If required.
-// Fetching a random quote from the API
 async function getRandomQuote() {
   const response = await fetch("http://api.quotable.io/random");
   const data = await response.json();
