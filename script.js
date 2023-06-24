@@ -1,8 +1,9 @@
 const quoteDisplay = document.getElementById("quote");
 const quoteInput = document.getElementById("quoteInput");
-const timerValue = document.getElementById("timerValue");
+const timerValue = document.querySelector(".timer span");
 let startTime, endTime, timerInterval;
 
+// Fetch a random quote from the API
 function fetchRandomQuote() {
   fetch("http://api.quotable.io/random")
     .then(response => response.json())
@@ -13,6 +14,7 @@ function fetchRandomQuote() {
     });
 }
 
+// Check typing accuracy and update text color
 function checkTypingAccuracy() {
   const quoteText = quoteDisplay.textContent;
   const typedText = quoteInput.value;
@@ -27,18 +29,22 @@ function checkTypingAccuracy() {
     }
   }
 
-  if (typedText.length === quoteText.length && isCorrect) {
+  if (typedText === quoteText && isCorrect) {
     clearInterval(timerInterval);
-    setTimeout(fetchRandomQuote, 3000);
+    setTimeout(() => {
+      fetchRandomQuote();
+      timerValue.textContent = "0";
+    }, 3000);
   }
 }
 
-
+// Update the timer value
 function updateTimer() {
   const currentTime = Math.floor((Date.now() - startTime) / 1000);
   timerValue.textContent = currentTime;
 }
 
+// Start the timer
 function startTimer() {
   startTime = Date.now();
   timerInterval = setInterval(updateTimer, 1000);
