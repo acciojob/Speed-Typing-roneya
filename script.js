@@ -1,78 +1,70 @@
-// Fetch a random quote from the API
-function fetchQuote() {
-  fetch('http://api.quotable.io/random')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('quote').innerText = data.content;
-    });
-}
+const RANDOM_QUOTE_API_URL = 'http://api.quotable.io/random'
+const quoteDisplayElement = document.getElementById('quoteDisplay')
+const quoteInputElement = document.getElementById('quoteInput')
+const timerElement = document.getElementById('timer')
 
-// Check if the typed text matches the quote
-function checkTyping() {
-  const quote = document.getElementById('quote').innerText;
-  const input = document.getElementById('quoteInput').value;
-  const quoteWords = quote.split(' ');
-  const inputWords = input.split(' ');
+const area={}
+quoteInputElement.addEventListener('input', () => {
+  const arrayQuote = quoteDisplayElement.querySelectorAll('span')
+  const arrayValue = quoteInputElement.value.split('')
 
-  document.getElementById('quote').innerHTML = '';
-
-  quoteWords.forEach((word, index) => {
-    const wordSpan = document.createElement('span');
-
-    if (inputWords[index] === word) {
-      wordSpan.classList.add('correct');
+  let correct = true
+  arrayQuote.forEach((characterSpan, index) => {
+    const character = arrayValue[index]
+    if (character == null) {
+      characterSpan.classList.remove('correct')
+      characterSpan.classList.remove('incorrect')
+      correct = false
+    } else if (character === characterSpan.innerText) {
+      characterSpan.classList.add('correct')
+      characterSpan.classList.remove('incorrect')
     } else {
-      wordSpan.classList.add('incorrect');
+      characterSpan.classList.remove('correct')
+      characterSpan.classList.add('incorrect')
+      correct = false
     }
+  })
 
-    wordSpan.innerText = word + ' ';
-    document.getElementById('quote').appendChild(wordSpan);
-  });
+  // if (correct) renderNewQuote()
+  console.log(arrayQuote.length,arrayValue.length)
+  if(arrayQuote.length<=arrayValue.length){
+    console.log(arrayQuote.length,arrayValue.length)
+    clearInterval(area.timer)
+
+    setTimeout(renderNewQuote,3000)
+  }
+})
+
+function getRandomQuote() {
+  return fetch(RANDOM_QUOTE_API_URL)
+    .then(response => response.json())
+    .then(data => data.content)
 }
 
-// Clear the input field
-function clearInput() {
-  document.getElementById('quoteInput').value = '';
+async function renderNewQuote() {
+  const quote = await getRandomQuote()
+  quoteDisplayElement.innerHTML = ''
+  // quoteDisplayElement.innerText = quote
+  quote.split('').forEach(character => {
+    const characterSpan = document.createElement('span')
+    characterSpan.innerText = character
+    quoteDisplayElement.appendChild(characterSpan)
+  })
+  quoteInputElement.value = null
+  startTimer()
 }
 
-// Reset the timer to zero
-function resetTimer() {
-  clearInterval(timer);
-  seconds = 0;
-  updateTimer();
-}
-
-// Update the timer display
-function updateTimer() {
-  document.querySelector('.timer').innerText = `Time: ${seconds}s`;
-}
-
-// Start the timer
+let startTime
 function startTimer() {
-  timer = setInterval(() => {
-    seconds++;
-    updateTimer();
-  }, 1000);
+  timerElement.innerText = 0
+  startTime = new Date()
+  area.timer = setInterval(() => {
+    timer.innerText = getTimerTime()
+  }, 1000)
 }
 
-// Fetch a new quote, clear input, and start the timer
-function fetchNewQuote() {
-  fetchQuote();
-  clearInput();
-  resetTimer();
-  setTimeout(startTimer, 3000);
+function getTimerTime() {
+  return Math.floor((new Date() - startTime) / 1000)
 }
 
-// Initialize the timer
-let seconds = 0;
-let timer;
-
-// Fetch initial quote and add event listener
-window.addEventListener('DOMContentLoaded', () => {
-  fetchQuote();
-  document.getElementById('quoteInput').addEventListener('input', checkTyping);
-  document.getElementById('quoteInput').addEventListener('input', clearInput);
-  document.getElementById('quoteInput').addEventListener('input', resetTimer);
-  document.getElementById('quoteInput').addEventListener('input', fetchNewQuote);
-  startTimer();
-});
+renderNewQuote()
